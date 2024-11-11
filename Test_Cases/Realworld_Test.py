@@ -247,7 +247,7 @@ def pcmextension():
     Here we use the Facebook page as the test case.
     This function is copied/pasted from jdianbbpnakhcmfkcckaboohfgnngfcc()
     """
-    extension_id = 'pcmextension'
+    extension_id = 'pcm-extension'
     extension_name = extension_id + '.crx'
     target_page = 'fb_post'
     test_URL = url_mp[target_page]
