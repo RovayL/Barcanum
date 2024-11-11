@@ -302,6 +302,67 @@ def pcmextension():
 
     deinit(extension_id)
 
+def nullextension():
+    """
+    This extension does nothing.
+    Here we use the Facebook page as the test case.
+    This function is copied/pasted from jdianbbpnakhcmfkcckaboohfgnngfcc()
+    """
+    extension_id = 'null-extension'
+    extension_name = extension_id + '.crx'
+    target_page = 'fb_post'
+    test_URL = url_mp[target_page]
+    recording_name = '%s.wprgo' % target_page
+    annotation_name = '%s.js' % target_page
+    rules = rules_map[target_page]
+    success_output = 'Realworld Extension [%s]: ' % extension_id + Back.GREEN + "Success" + Back.RESET + "."
+    fail_output = 'Realworld Extension [%s]: ' % extension_id + Fore.RED + "Fail" + Fore.RESET + "."
+
+    check_file_exist(extension_name=extension_name, recording_name=recording_name, annotation_name=annotation_name)
+
+    init(extension_id)
+
+    try:
+        driver = launch_driver(load_extension = True, extension_name = extension_name,
+                               recording_name = recording_name, rules = rules, annotation_name = annotation_name,
+                               idle_timeout_ms=12000)
+        print('Launch Arcanum success. Arcanum starts running.')
+        time.sleep(1)
+        driver.get(test_URL)
+        ui = ''
+        try:
+            ui = WebDriverWait(driver, 40).until(
+                EC.visibility_of_element_located((By.ID, "mount_0_0_LC")))
+        finally:
+            innerhtml = ui.get_attribute('innerHTML')
+            tainted_element_num = innerhtml.count('data-taint')
+            if (tainted_element_num):
+                print('Inject annotation success: There are %d tainted DOM elements on the page.'%tainted_element_num)
+        print('Execute the extension for 60s after the web page has completely loaded, waiting now...')
+        time.sleep(EXECUTION_TIME)
+        driver.quit()
+    except Exception as e:
+        print(e)
+        print(fail_output)
+        return
+
+    print('End running Arcanum. Start checking taint logs. ')
+
+    if os.path.exists(v8_log_path + 'taint_sources.log') \
+            and os.path.exists(v8_log_path + 'taint_storage.log'):
+        source_content = input_source_logs()
+        storage_content = input_sink_logs('storage')
+        # Profile keywords. See the screenshot in /Taint_Logs/jdianbbpnakhcmfkcckaboohfgnngfcc/fb_post/ to locate
+        # where the sensitive information appears on the page.
+        if True:
+            print(success_output)
+        else:
+            print(fail_output + " Expected content not in the taint logs")
+    else:
+        print(fail_output + " Expected taint log file not found. ")
+
+    deinit(extension_id)
+
 def jdianbbpnakhcmfkcckaboohfgnngfcc():
     """
     This extension collects profile and identity information on Facebook,
@@ -922,6 +983,8 @@ if __name__ == '__main__':
     aamfmnhcipnbjjnbfmaoooiohikifefk()     # Case Study (Sec 4.10), Table 7 (Sec 4.5)
 
     pcmextension()                         # pcm.js
+
+    nullextension()                        # NULL extension that doesn't do anything
 
     jdianbbpnakhcmfkcckaboohfgnngfcc()     # Case Study (Sec 4.10), Table 7 (Sec 4.5)
 
